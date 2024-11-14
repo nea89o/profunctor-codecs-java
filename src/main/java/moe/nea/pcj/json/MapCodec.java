@@ -13,24 +13,32 @@ public interface MapCodec<T, Format> {
 
 	default <O> MapCodec<? extends O, Format> dispatch(
 			Function<? super O, ? extends T> keyExtractor,
-			Function<? super T, MapCodec<? extends O, Format>> codecGenerator
+			Function<? super T, Result<? extends MapCodec<? extends O, Format>, ? extends JsonLikeError>> codecGenerator
 	) {
 		// TODO: the codecGenerator function is not exactly typesafe. there should be some limit on keyExtractor and codecGenerator working in tandem
 		return new MapCodec<>() {
 			@Override
-			public Result<O, JsonLikeError> decode(RecordView<Format> record, JsonLikeOperations<Format> ops) {
+			public Result<O, JsonLikeError> decode(RecordView<Format> record, JsonLikeOperations<Format> ops) { // TODO: map errors
 				return MapCodec.this.decode(record, ops)
-				                    .map(codecGenerator::apply)
-				                    .flatMap(codec -> codec.decode(record, ops));
+				                    .flatMap(key -> codecGenerator
+						                    .apply(key)
+						                    .<JsonLikeError>mapError(DuringKeyExtraction::new)
+						                    .flatMap(codec -> codec.decode(record, ops)
+						                                           .<JsonLikeError>mapError(it -> new InSubType<>(key, it))));
 			}
 
 			@Override
 			public Result<RecordBuilder<Format>, JsonLikeError> encode(O value, JsonLikeOperations<Format> ops) {
 				var key = keyExtractor.apply(value);
-				var codec = codecGenerator.apply(key);
-				return MapCodec.this
-						.encode(key, ops)
-						.flatMap(keyEncoded -> ((MapCodec<O, Format>) codec).encode(value, ops).flatMap(keyEncoded::mergeWith));
+				return Result.<MapCodec<? extends O, Format>, JsonLikeError>cast(
+						             codecGenerator.apply(key)
+						                           .mapError(DuringKeyExtraction::new))
+				             .flatMap(codec -> MapCodec.this
+						             .encode(key, ops)
+						             .flatMap(keyEncoded -> ((MapCodec<O, Format>) codec)
+								             .encode(value, ops)
+								             .<JsonLikeError>mapError(it -> new InSubType<>(key, it))
+								             .flatMap(keyEncoded::mergeWith)));
 			}
 		};
 	}

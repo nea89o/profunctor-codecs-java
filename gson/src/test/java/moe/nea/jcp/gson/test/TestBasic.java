@@ -13,12 +13,15 @@ import moe.nea.pcj.Result;
 import moe.nea.pcj.json.AtField;
 import moe.nea.pcj.json.AtIndex;
 import moe.nea.pcj.json.DuplicateJsonKey;
+import moe.nea.pcj.json.DuringKeyExtraction;
+import moe.nea.pcj.json.InSubType;
 import moe.nea.pcj.json.JsonLikeError;
 import moe.nea.pcj.json.JsonLikeOperations;
 import moe.nea.pcj.json.MissingKey;
 import moe.nea.pcj.json.NamedObject;
 import moe.nea.pcj.json.RecordJoiners;
 import moe.nea.pcj.json.UnexpectedJsonElement;
+import moe.nea.pcj.json.UnknownSubtype;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +40,7 @@ public class TestBasic {
 		);
 	}
 
-	private <T> void assertSuccess(Result<T, ?> result, T expected) {
+	private <T> void assertSuccess(Result<? extends T, ?> result, T expected) {
 		for (Object error : result.errors()) {
 			throw new AssertionError(error.toString());
 		}
@@ -146,6 +149,10 @@ public class TestBasic {
 		           new AtIndex(0, new UnexpectedJsonElement("object", mkPrim("foo"))));
 	}
 
+	<T> T implicitCast(T t) {
+		return t;
+	}
+
 	@Test
 	void testDispatched() {
 		var testObjectCodec = RecordJoiners.join(
@@ -157,18 +164,43 @@ public class TestBasic {
 				codecs.STRING.fieldOf("test").withGetter(OtherTestObject::test),
 				OtherTestObject::new
 		);
-		codecs.STRING.fieldOf("type")
-		             .<Parent>dispatch(
-				             obj -> switch (obj) {
-					             case OtherTestObject ignored -> "other";
-					             case TestObject ignored -> "normal";
-				             },
-				             key -> switch (key) {
-					             case "other" -> otherObjectCodec;
-					             case "normal" -> testObjectCodec;
-					             default -> throw new AssertionError("Unknown thing");
-				             }
-		             );
+		var parentCodec = codecs.STRING.fieldOf("type")
+		                               .<Parent>dispatch(
+				                               obj -> switch (obj) {
+					                               case OtherTestObject ignored -> "other";
+					                               case TestObject ignored -> "normal";
+				                               },
+				                               key -> switch (key) {
+					                               case "other" -> Result.ok(otherObjectCodec);
+					                               case "normal" -> Result.ok(testObjectCodec);
+					                               default -> Result.fail(new UnknownSubtype<>(key, "other", "normal"));
+				                               }
+		                               );
+		assertSuccess(decode(parentCodec.codec(), mkJsonObject(
+				"type", "other",
+				"test", "test"
+		)), new OtherTestObject("test"));
+		assertSuccess(decode(parentCodec.codec(), mkJsonObject(
+				"type", "normal",
+				"foo", "fooVal",
+				"bar", 10
+		)), new TestObject("fooVal", 10));
+		assertFail(
+				decode(parentCodec.codec(), mkJsonObject(
+						"type", "unknown",
+						"foo", "fooVal",
+						"bar", 10
+				)),
+				new DuringKeyExtraction(new UnknownSubtype<>("unknown", "other", "normal"))
+		);
+		assertFail(
+				decode(parentCodec.codec(), mkJsonObject(
+						"type", "other",
+						"foo", "fooVal",
+						"bar", 10
+				)),
+				new InSubType<>("other", new MissingKey("test"))
+		);
 	}
 }
 
