@@ -26,7 +26,7 @@ public interface JsonLikeOperations<Format> extends Operation<Format> {
 
 	Result<? extends RecordView<Format>, ? extends JsonLikeError> getObject(Format format);
 
-	ListBuilder<Format, Format> createList();
+	ListBuilder<Format> createList();
 
 	Result<? extends ListView<Format>, ? extends JsonLikeError> getList(Format format);
 }

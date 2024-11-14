@@ -44,8 +44,4 @@ public class BasicCodecs<Format> {
 			return Result.ok(ops.createNumeric(data));
 		}
 	};
-
-	public <T> JsonCodec<T, Format> objectCodec() {
-
-	}
 }

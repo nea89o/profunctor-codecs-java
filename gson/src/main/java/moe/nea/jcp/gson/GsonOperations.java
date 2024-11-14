@@ -16,6 +16,8 @@ import moe.nea.pcj.Unit;
 import moe.nea.pcj.json.UnexpectedJsonElement;
 
 public class GsonOperations implements JsonLikeOperations<JsonElement> {
+	public static final GsonOperations INSTANCE = new GsonOperations();
+
 	@Override
 	public JsonElement createNull(Unit value) {
 		return JsonNull.INSTANCE;
@@ -80,7 +82,7 @@ public class GsonOperations implements JsonLikeOperations<JsonElement> {
 	}
 
 	@Override
-	public ListBuilder<JsonArray, JsonElement> createList() {
+	public ListBuilder<JsonElement> createList() {
 		return new GsonListBuilder();
 	}
 

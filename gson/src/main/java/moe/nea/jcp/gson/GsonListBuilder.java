@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import moe.nea.pcj.json.ListBuilder;
 
-public class GsonListBuilder extends GsonListView implements ListBuilder<JsonArray, JsonElement> {
+public class GsonListBuilder extends GsonListView implements ListBuilder<JsonElement> {
 
 	public GsonListBuilder() {
 		super(new JsonArray());
