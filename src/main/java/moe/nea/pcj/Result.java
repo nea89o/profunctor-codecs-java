@@ -5,6 +5,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -40,6 +41,7 @@ public sealed interface Result<Good, Bad> permits Result.Ok, Result.Fail {
 	record Ok<Good, Bad>(Good okValue) implements Result<Good, Bad> {
 		@Override
 		public Result<Good, Bad> appendErrors(List<Bad> errors) {
+			if (errors.isEmpty()) return new Ok<>(okValue);
 			return new Fail<>(okValue, errors);
 		}
 
@@ -67,12 +69,40 @@ public sealed interface Result<Good, Bad> permits Result.Ok, Result.Fail {
 		public Optional<Good> value() {
 			return Optional.of(okValue);
 		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(okValue);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) return true;
+			if (obj instanceof Result.Ok<?, ?> ok) {
+				return Objects.equals(ok.okValue, this.okValue);
+			}
+			return false;
+		}
 	}
 
 	record Fail<Good, Bad>(@Nullable Good partialValue, List<Bad> badValue) implements Result<Good, Bad> {
 		public Fail {
 			if (badValue.isEmpty())
 				throw new IllegalArgumentException("Cannot create failure without any error values");
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) return true;
+			if (obj instanceof Result.Fail<?, ?> fail) {
+				return Objects.equals(partialValue, fail.partialValue) && badValue.equals(fail.badValue);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(partialValue, badValue);
 		}
 
 		@Override

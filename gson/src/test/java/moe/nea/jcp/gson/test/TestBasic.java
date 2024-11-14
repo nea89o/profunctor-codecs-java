@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import moe.nea.jcp.gson.GsonCodecs;
 import moe.nea.jcp.gson.GsonOperations;
+import moe.nea.pcj.Codec;
 import moe.nea.pcj.Decode;
 import moe.nea.pcj.Result;
 import moe.nea.pcj.json.JsonLikeError;
@@ -37,8 +38,10 @@ public class TestBasic {
 		Assertions.assertEquals(expected, result.valueOrPartial().get());
 	}
 
-	<T> Result<T, JsonLikeError> decode(Decode<T, JsonElement, JsonLikeOperations<JsonElement>, JsonLikeError> decode, JsonElement element) {
-		return Result.cast(decode.decode(element, GsonOperations.INSTANCE));
+	<T> Result<T, JsonLikeError> decode(Codec<T, JsonElement, JsonLikeOperations<JsonElement>, JsonLikeError, JsonLikeError> decode, JsonElement element) {
+		Result<T, JsonLikeError> result = Result.cast(decode.decode(element, GsonOperations.INSTANCE));
+		result.value().ifPresent(decoded -> Assertions.assertEquals(Result.ok(element), decode.encode(decoded, GsonOperations.INSTANCE)));
+		return result;
 	}
 
 	GsonCodecs codecs = GsonCodecs.INSTANCE;
