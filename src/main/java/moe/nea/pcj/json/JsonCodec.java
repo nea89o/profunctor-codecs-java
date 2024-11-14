@@ -2,7 +2,6 @@ package moe.nea.pcj.json;
 
 import moe.nea.pcj.Codec;
 import moe.nea.pcj.Result;
-import moe.nea.pcj.Unit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +42,20 @@ public interface JsonCodec<T, Format> extends Codec<
 					}
 					return Result.<List<T>, JsonLikeError>ok(acc).appendErrors(errors);
 				});
+			}
+		};
+	}
+
+	default JsonCodec<T, Format> named(String name) {
+		return new JsonCodec<>() {
+			@Override
+			public Result<? extends T, JsonLikeError> decode(Format format, JsonLikeOperations<Format> ops) {
+				return JsonCodec.this.decode(format, ops).mapError(it -> new NamedObject(name, it));
+			}
+
+			@Override
+			public Result<? extends Format, JsonLikeError> encode(T data, JsonLikeOperations<Format> ops) {
+				return JsonCodec.this.encode(data, ops).mapError(it -> new NamedObject(name, it));
 			}
 		};
 	}

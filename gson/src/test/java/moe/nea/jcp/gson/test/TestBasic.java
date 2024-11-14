@@ -16,6 +16,7 @@ import moe.nea.pcj.json.DuplicateJsonKey;
 import moe.nea.pcj.json.JsonLikeError;
 import moe.nea.pcj.json.JsonLikeOperations;
 import moe.nea.pcj.json.MissingKey;
+import moe.nea.pcj.json.NamedObject;
 import moe.nea.pcj.json.RecordJoiners;
 import moe.nea.pcj.json.UnexpectedJsonElement;
 import org.junit.jupiter.api.Assertions;
@@ -95,6 +96,12 @@ public class TestBasic {
 			int bar
 	) {}
 
+
+	@Test
+	void testNamedFunction() {
+		assertFail(decode(codecs.STRING.named("Test"), mkPrim(0)),
+		           new NamedObject("Test", new UnexpectedJsonElement("string", mkPrim(0))));
+	}
 
 	@Test
 	void testObject() {
