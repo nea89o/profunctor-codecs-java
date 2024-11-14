@@ -9,6 +9,8 @@ import moe.nea.jcp.gson.GsonOperations;
 import moe.nea.pcj.Codec;
 import moe.nea.pcj.Decode;
 import moe.nea.pcj.Result;
+import moe.nea.pcj.json.AtField;
+import moe.nea.pcj.json.DuplicateJsonKey;
 import moe.nea.pcj.json.JsonLikeError;
 import moe.nea.pcj.json.JsonLikeOperations;
 import moe.nea.pcj.json.MissingKey;
@@ -44,6 +46,23 @@ public class TestBasic {
 		return result;
 	}
 
+	static JsonElement mkPrim(Object arg) {
+		if (arg instanceof JsonElement el) return el;
+		if (arg instanceof String str) return new JsonPrimitive(str);
+		if (arg instanceof Number num) return new JsonPrimitive(num);
+		if (arg == null) return JsonNull.INSTANCE;
+		if (arg instanceof Boolean b) return new JsonPrimitive(b);
+		throw new IllegalArgumentException("Cannot convert " + arg + " to json object");
+	}
+
+	static JsonObject mkJsonObject(Object... args) {
+		JsonObject obj = new JsonObject();
+		for (int i = 0; i < args.length; i += 2) {
+			obj.add((String) args[i], mkPrim(args[i + 1]));
+		}
+		return obj;
+	}
+
 	GsonCodecs codecs = GsonCodecs.INSTANCE;
 
 	@Test
@@ -65,22 +84,6 @@ public class TestBasic {
 			int bar
 	) {}
 
-	static JsonElement mkPrim(Object arg) {
-		if (arg instanceof JsonElement el) return el;
-		if (arg instanceof String str) return new JsonPrimitive(str);
-		if (arg instanceof Number num) return new JsonPrimitive(num);
-		if (arg == null) return JsonNull.INSTANCE;
-		if (arg instanceof Boolean b) return new JsonPrimitive(b);
-		throw new IllegalArgumentException("Cannot convert " + arg + " to json object");
-	}
-
-	static JsonObject mkJsonObject(Object... args) {
-		JsonObject obj = new JsonObject();
-		for (int i = 0; i < args.length; i += 2) {
-			obj.add((String) args[i], mkPrim(args[i + 1]));
-		}
-		return obj;
-	}
 
 	@Test
 	void testObject() {
@@ -93,6 +96,19 @@ public class TestBasic {
 		              new TestObject("fooValue", -10));
 		assertFail(decode(codec, mkJsonObject("foo", "fooValue")),
 		           new MissingKey("bar"));
+		assertFail(decode(codec, mkJsonObject("foo", "fooValue", "bar", "test")),
+		           new AtField("bar", new UnexpectedJsonElement("number", mkPrim("test"))));
+	}
+	@Test
+	void testDuplicateKeys() {
+		var codec = RecordJoiners.join(
+				codecs.STRING.fieldOf("foo").withGetter(TestObject::foo),
+				codecs.INTEGER.fieldOf("foo").withGetter(TestObject::bar),
+				TestObject::new
+		);
+		// TODO: add test for decoding with duplicate keys warning (esp. optional fields)
+		assertFail(codec.encode(new TestObject("", 0), GsonOperations.INSTANCE),
+		           new DuplicateJsonKey("foo"));
 	}
 }
 
