@@ -1,4 +1,4 @@
-package moe.nea.pcj;
+package moe.nea.pcj.json;
 
 public interface ListBuilder<Format, ElementFormat> extends ListView<ElementFormat> {
 	Format complete();

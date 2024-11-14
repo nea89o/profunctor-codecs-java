@@ -2,12 +2,15 @@ package moe.nea.pcj;
 
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 public sealed interface Result<Good, Bad> permits Result.Ok, Result.Fail {
 	default boolean isOk() {
-		return error().isEmpty();
+		return errors().isEmpty();
 	}
 
 	Optional<Good> value();
@@ -18,26 +21,31 @@ public sealed interface Result<Good, Bad> permits Result.Ok, Result.Fail {
 		return value().or(this::partial);
 	}
 
-	Optional<Bad> error();
+	List<Bad> errors();
 
 	default <Next> Result<Next, Bad> map(Function<Good, Next> mapper) {
 		return flatMap(mapper.andThen(Result::ok));
 	}
 
-	default <Next> Result<Next, Bad> flatMap(Function<Good, Result<Next, Bad>> mapper) {
-		return flatMapBoth(mapper, Result::fail);
+	<Next> Result<Next, Bad> flatMap(Function<Good, Result<? extends Next, ? extends Bad>> mapper);
+
+	default <NextBad> Result<Good, NextBad> mapError(Function<Bad, NextBad> mapper) {
+		return mapErrors(it -> it.stream().map(mapper).toList());
 	}
 
-	<NextGood> Result<NextGood, Bad> flatMapBoth(
-			Function<Good, Result<NextGood, Bad>> mapGood,
-			Function<Bad, Result<NextGood, Bad>> mapBad);
+	<NextBad> Result<Good, NextBad> mapErrors(Function<List<Bad>, List<NextBad>> mapper);
 
-	Result<Good, Bad> appendError(Bad error);
+	Result<Good, Bad> appendErrors(List<Bad> error);
 
 	record Ok<Good, Bad>(Good okValue) implements Result<Good, Bad> {
 		@Override
-		public Result<Good, Bad> appendError(Bad error) {
-			return Result.partial(okValue, error);
+		public Result<Good, Bad> appendErrors(List<Bad> errors) {
+			return new Fail<>(okValue, errors);
+		}
+
+		@Override
+		public <NextBad> Result<Good, NextBad> mapErrors(Function<List<Bad>, List<NextBad>> mapper) {
+			return new Ok<>(okValue);
 		}
 
 		@Override
@@ -46,22 +54,26 @@ public sealed interface Result<Good, Bad> permits Result.Ok, Result.Fail {
 		}
 
 		@Override
+		public List<Bad> errors() {
+			return List.of();
+		}
+
+		@Override
+		public <Next> Result<Next, Bad> flatMap(Function<Good, Result<? extends Next, ? extends Bad>> mapper) {
+			return Result.cast(mapper.apply(okValue));
+		}
+
+		@Override
 		public Optional<Good> value() {
 			return Optional.of(okValue);
 		}
-
-		@Override
-		public Optional<Bad> error() {
-			return Optional.empty();
-		}
-
-		@Override
-		public <NextGood> Result<NextGood, Bad> flatMapBoth(Function<Good, Result<NextGood, Bad>> mapGood, Function<Bad, Result<NextGood, Bad>> mapBad) {
-			return mapGood.apply(okValue);
-		}
 	}
 
-	record Fail<Good, Bad>(@Nullable Good partialValue, Bad badValue) implements Result<Good, Bad> {
+	record Fail<Good, Bad>(@Nullable Good partialValue, List<Bad> badValue) implements Result<Good, Bad> {
+		public Fail {
+			if (badValue.isEmpty())
+				throw new IllegalArgumentException("Cannot create failure without any error values");
+		}
 
 		@Override
 		public Optional<Good> value() {
@@ -74,22 +86,28 @@ public sealed interface Result<Good, Bad> permits Result.Ok, Result.Fail {
 		}
 
 		@Override
-		public Optional<Bad> error() {
-			return Optional.of(badValue);
+		public List<Bad> errors() {
+			return Collections.unmodifiableList(badValue);
 		}
 
 		@Override
-		public <NextGood> Result<NextGood, Bad> flatMapBoth(Function<Good, Result<NextGood, Bad>> mapGood, Function<Bad, Result<NextGood, Bad>> mapBad) {
+		public <Next> Result<Next, Bad> flatMap(Function<Good, Result<? extends Next, ? extends Bad>> mapper) {
 			if (partialValue != null) {
-				var nextPartial = mapGood.apply(partialValue);
-				return nextPartial.appendError(badValue);
+				return Result.<Next, Bad>cast(mapper.apply(partialValue)).appendErrors(badValue);
 			}
-			return mapBad.apply(badValue);
+			return new Fail<>(null, badValue);
 		}
 
 		@Override
-		public Result<Good, Bad> appendError(Bad error) {
-			return Result.partial(partialValue, AppendableError.concatError(badValue, error));
+		public <NextBad> Result<Good, NextBad> mapErrors(Function<List<Bad>, List<NextBad>> mapper) {
+			return new Fail<>(partialValue, mapper.apply(badValue));
+		}
+
+		@Override
+		public Result<Good, Bad> appendErrors(List<Bad> errors) {
+			var nextErrors = new ArrayList<>(badValue);
+			nextErrors.addAll(errors);
+			return new Fail<>(partialValue, nextErrors);
 		}
 	}
 
@@ -98,10 +116,16 @@ public sealed interface Result<Good, Bad> permits Result.Ok, Result.Fail {
 	}
 
 	static <Good, Bad> Result.Fail<Good, Bad> fail(Bad error) {
-		return new Fail<>(null, error);
+		return new Fail<>(null, List.of(error));
+	}
+
+
+	static <Good, Bad> Result<Good, Bad> cast(Result<? extends Good, ? extends Bad> c) {
+		//noinspection unchecked
+		return (Result<Good, Bad>) c;
 	}
 
 	static <Good, Bad> Result.Fail<Good, Bad> partial(@Nullable Good partial, Bad error) {
-		return new Fail<>(partial, error);
+		return new Fail<>(partial, List.of(error));
 	}
 }

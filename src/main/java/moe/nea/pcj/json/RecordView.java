@@ -1,10 +1,10 @@
-package moe.nea.pcj;
+package moe.nea.pcj.json;
 
 import java.util.Collection;
 import java.util.Optional;
 
 public interface RecordView<Format> {
-	Collection<Format> getKeys();
+	Collection<String> getKeys();
 
 	Optional<Format> get(String key);
 }
