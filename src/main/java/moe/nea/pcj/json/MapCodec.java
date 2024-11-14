@@ -11,6 +11,10 @@ public interface MapCodec<T, Format> {
 
 	Result<RecordBuilder<Format>, JsonLikeError> encode(T value, JsonLikeOperations<Format> ops);
 
+	default JsonCodec<T, Format> codec() {
+		return RecordJoiners.join(withGetter(it -> it), it -> it);
+	}
+
 	default <O> RecordCodec<O, T, Format> withGetter(Function<O, T> getter) {
 		return new RecordCodec<>(this, getter);
 	}

@@ -1,5 +1,6 @@
 package moe.nea.jcp.gson.test;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -10,6 +11,7 @@ import moe.nea.pcj.Codec;
 import moe.nea.pcj.Decode;
 import moe.nea.pcj.Result;
 import moe.nea.pcj.json.AtField;
+import moe.nea.pcj.json.AtIndex;
 import moe.nea.pcj.json.DuplicateJsonKey;
 import moe.nea.pcj.json.JsonLikeError;
 import moe.nea.pcj.json.JsonLikeOperations;
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class TestBasic {
@@ -53,6 +56,14 @@ public class TestBasic {
 		if (arg == null) return JsonNull.INSTANCE;
 		if (arg instanceof Boolean b) return new JsonPrimitive(b);
 		throw new IllegalArgumentException("Cannot convert " + arg + " to json object");
+	}
+
+	static JsonArray mkJsonArray(Object... args) {
+		JsonArray array = new JsonArray();
+		for (Object arg : args) {
+			array.add(mkPrim(arg));
+		}
+		return array;
 	}
 
 	static JsonObject mkJsonObject(Object... args) {
@@ -99,6 +110,7 @@ public class TestBasic {
 		assertFail(decode(codec, mkJsonObject("foo", "fooValue", "bar", "test")),
 		           new AtField("bar", new UnexpectedJsonElement("number", mkPrim("test"))));
 	}
+
 	@Test
 	void testDuplicateKeys() {
 		var codec = RecordJoiners.join(
@@ -109,6 +121,15 @@ public class TestBasic {
 		// TODO: add test for decoding with duplicate keys warning (esp. optional fields)
 		assertFail(codec.encode(new TestObject("", 0), GsonOperations.INSTANCE),
 		           new DuplicateJsonKey("foo"));
+	}
+
+	@Test
+	void testList() {
+		var codec = codecs.STRING.fieldOf("hello").codec().listOf();
+		assertSuccess(decode(codec, mkJsonArray(mkJsonObject("hello", "foo"), mkJsonObject("hello", "bar"))),
+		              List.of("foo", "bar"));
+		assertFail(decode(codec, mkJsonArray("foo", mkJsonObject("hello", "bar"))),
+		           new AtIndex(0, new UnexpectedJsonElement("object", mkPrim("foo"))));
 	}
 }
 

@@ -23,9 +23,8 @@ public class GsonRecordBuilder extends GsonRecordView implements RecordBuilder<J
 		return Result.cast(Stream.of(this.complete(), other.complete())
 		                         .flatMap(it -> ((JsonObject) it).entrySet().stream())
 		                         .map(it -> next.add(it.getKey(), it.getValue()))
-		                         .reduce((left, right) -> left.appendErrors(right.errors()))
-		                         .map(it -> it.map(unit -> next))
-		                         .orElse(Result.ok(next)));
+		                         .reduce(Result.ok(Unit.INSTANCE), (left, right) -> left.appendErrors(right.errors()))
+		                         .map(unit -> next));
 	}
 
 	@Override
