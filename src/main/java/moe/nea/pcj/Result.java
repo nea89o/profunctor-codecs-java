@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public sealed interface Result<Good, Bad> permits Result.Ok, Result.Fail {
@@ -36,6 +35,10 @@ public sealed interface Result<Good, Bad> permits Result.Ok, Result.Fail {
 	}
 
 	<NextBad> Result<Good, NextBad> mapErrors(Function<List<Bad>, List<NextBad>> mapper);
+
+	default Result<Good, Bad> appendError(Bad error) {
+		return appendErrors(List.of(error));
+	}
 
 	Result<Good, Bad> appendErrors(List<Bad> error);
 

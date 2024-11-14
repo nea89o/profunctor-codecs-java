@@ -35,19 +35,18 @@ function argFor(va: string): string {
 function genRecordJoiner(elements: number) {
     if (!elements) return
     const vars = [...new Array(elements)].map((_, idx) => "T" + idx)
-    console.log(`\tpublic static ${typArgs([...vars, 'O', 'Format'])} JsonCodec<O, Format> join(`)
+    console.log(`\tpublic static ${typArgs([...vars, 'O', 'Format'])} MapCodec<O, Format> join(`)
     for (let var1 of vars) {
         console.log(`\t\tRecordCodec<O, ${var1}, Format> ${argFor(var1)},`)
     }
     console.log(`\t\tTuple.Func${elements}${typArgs(['O', ...vars])} joiner`)
     console.log("\t) {")
-    console.log("\t\treturn new RecordCompleteCodec<>() {")
+    console.log("\t\treturn new MapCodec<>() {")
 
     console.log("\t\t\t@Override")
-    console.log("\t\t\tpublic Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {")
+    console.log("\t\t\tpublic Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {")
     console.log(`\t\t\t\treturn Stream.of(${vars.map(it => argFor(it) + ".enc(data, ops)").join(", ")})`)
-    console.log(`\t\t\t\t\t.reduce(Result.ok(ops.createObject()), RecordCodec::merge)`)
-    console.log(`\t\t\t\t\t.map(RecordBuilder::complete);`)
+    console.log(`\t\t\t\t\t.reduce(Result.ok(ops.createObject()), RecordCodec::merge);`)
     console.log("\t\t\t}")
 
     console.log("\t\t\t@Override")
@@ -65,7 +64,6 @@ function genRecords(maxI: number) {
     console.log("package moe.nea.pcj.json;")
     console.log(`
 import moe.nea.pcj.*;
-import moe.nea.pcj.json.RecordCodec.*;
 import java.util.stream.*;`)
     console.log()
     console.log("@SuppressWarnings(\"unused\")")

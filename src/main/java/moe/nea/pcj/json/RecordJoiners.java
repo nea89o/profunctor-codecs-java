@@ -2,21 +2,19 @@
 package moe.nea.pcj.json;
 
 import moe.nea.pcj.*;
-import moe.nea.pcj.json.RecordCodec.*;
 import java.util.stream.*;
 
 @SuppressWarnings("unused")
 public class RecordJoiners {
-	public static <T0, O, Format> JsonCodec<O, Format> join(
+	public static <T0, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			Tuple.Func1<O, T0> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -25,17 +23,16 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			Tuple.Func2<O, T0, T1> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -44,18 +41,17 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
 			Tuple.Func3<O, T0, T1, T2> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -64,19 +60,18 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
 			RecordCodec<O, T3, Format> arg3,
 			Tuple.Func4<O, T0, T1, T2, T3> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -85,7 +80,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -93,12 +88,11 @@ public class RecordJoiners {
 			RecordCodec<O, T4, Format> arg4,
 			Tuple.Func5<O, T0, T1, T2, T3, T4> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -107,7 +101,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, T5, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, T5, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -116,12 +110,11 @@ public class RecordJoiners {
 			RecordCodec<O, T5, Format> arg5,
 			Tuple.Func6<O, T0, T1, T2, T3, T4, T5> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops), arg5.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -130,7 +123,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, T5, T6, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, T5, T6, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -140,12 +133,11 @@ public class RecordJoiners {
 			RecordCodec<O, T6, Format> arg6,
 			Tuple.Func7<O, T0, T1, T2, T3, T4, T5, T6> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops), arg5.enc(data, ops), arg6.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -154,7 +146,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, T5, T6, T7, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, T5, T6, T7, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -165,12 +157,11 @@ public class RecordJoiners {
 			RecordCodec<O, T7, Format> arg7,
 			Tuple.Func8<O, T0, T1, T2, T3, T4, T5, T6, T7> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops), arg5.enc(data, ops), arg6.enc(data, ops), arg7.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -179,7 +170,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -191,12 +182,11 @@ public class RecordJoiners {
 			RecordCodec<O, T8, Format> arg8,
 			Tuple.Func9<O, T0, T1, T2, T3, T4, T5, T6, T7, T8> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops), arg5.enc(data, ops), arg6.enc(data, ops), arg7.enc(data, ops), arg8.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -205,7 +195,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -218,12 +208,11 @@ public class RecordJoiners {
 			RecordCodec<O, T9, Format> arg9,
 			Tuple.Func10<O, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops), arg5.enc(data, ops), arg6.enc(data, ops), arg7.enc(data, ops), arg8.enc(data, ops), arg9.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -232,7 +221,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -246,12 +235,11 @@ public class RecordJoiners {
 			RecordCodec<O, T10, Format> arg10,
 			Tuple.Func11<O, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops), arg5.enc(data, ops), arg6.enc(data, ops), arg7.enc(data, ops), arg8.enc(data, ops), arg9.enc(data, ops), arg10.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -260,7 +248,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -275,12 +263,11 @@ public class RecordJoiners {
 			RecordCodec<O, T11, Format> arg11,
 			Tuple.Func12<O, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops), arg5.enc(data, ops), arg6.enc(data, ops), arg7.enc(data, ops), arg8.enc(data, ops), arg9.enc(data, ops), arg10.enc(data, ops), arg11.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -289,7 +276,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -305,12 +292,11 @@ public class RecordJoiners {
 			RecordCodec<O, T12, Format> arg12,
 			Tuple.Func13<O, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops), arg5.enc(data, ops), arg6.enc(data, ops), arg7.enc(data, ops), arg8.enc(data, ops), arg9.enc(data, ops), arg10.enc(data, ops), arg11.enc(data, ops), arg12.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {
@@ -319,7 +305,7 @@ public class RecordJoiners {
 			}
 		};
 	}
-	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, O, Format> JsonCodec<O, Format> join(
+	public static <T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, O, Format> MapCodec<O, Format> join(
 			RecordCodec<O, T0, Format> arg0,
 			RecordCodec<O, T1, Format> arg1,
 			RecordCodec<O, T2, Format> arg2,
@@ -336,12 +322,11 @@ public class RecordJoiners {
 			RecordCodec<O, T13, Format> arg13,
 			Tuple.Func14<O, T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> joiner
 	) {
-		return new RecordCompleteCodec<>() {
+		return new MapCodec<>() {
 			@Override
-			public Result<Format, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
+			public Result<RecordBuilder<Format>, JsonLikeError> encode(O data, JsonLikeOperations<Format> ops) {
 				return Stream.of(arg0.enc(data, ops), arg1.enc(data, ops), arg2.enc(data, ops), arg3.enc(data, ops), arg4.enc(data, ops), arg5.enc(data, ops), arg6.enc(data, ops), arg7.enc(data, ops), arg8.enc(data, ops), arg9.enc(data, ops), arg10.enc(data, ops), arg11.enc(data, ops), arg12.enc(data, ops), arg13.enc(data, ops))
-				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge)
-				             .map(RecordBuilder::complete);
+				             .reduce(Result.ok(ops.createObject()), RecordCodec::merge);
 			}
 			@Override
 			public Result<O, JsonLikeError> decode(RecordView<Format> format, JsonLikeOperations<Format> ops) {

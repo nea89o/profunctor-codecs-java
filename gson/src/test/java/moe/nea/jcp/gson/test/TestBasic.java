@@ -91,10 +91,17 @@ public class TestBasic {
 		           new UnexpectedJsonElement("number", mkPrim("1")));
 	}
 
+	sealed interface Parent permits OtherTestObject, TestObject {
+	}
+
+	record OtherTestObject(
+			String test
+	) implements Parent {}
+
 	record TestObject(
 			String foo,
 			int bar
-	) {}
+	) implements Parent {}
 
 
 	@Test
@@ -109,7 +116,7 @@ public class TestBasic {
 				codecs.STRING.fieldOf("foo").withGetter(TestObject::foo),
 				codecs.INTEGER.fieldOf("bar").withGetter(TestObject::bar),
 				TestObject::new
-		);
+		).codec();
 		assertSuccess(decode(codec, mkJsonObject("foo", "fooValue", "bar", -10)),
 		              new TestObject("fooValue", -10));
 		assertFail(decode(codec, mkJsonObject("foo", "fooValue")),
@@ -124,7 +131,7 @@ public class TestBasic {
 				codecs.STRING.fieldOf("foo").withGetter(TestObject::foo),
 				codecs.INTEGER.fieldOf("foo").withGetter(TestObject::bar),
 				TestObject::new
-		);
+		).codec();
 		// TODO: add test for decoding with duplicate keys warning (esp. optional fields)
 		assertFail(codec.encode(new TestObject("", 0), GsonOperations.INSTANCE),
 		           new DuplicateJsonKey("foo"));
@@ -137,6 +144,31 @@ public class TestBasic {
 		              List.of("foo", "bar"));
 		assertFail(decode(codec, mkJsonArray("foo", mkJsonObject("hello", "bar"))),
 		           new AtIndex(0, new UnexpectedJsonElement("object", mkPrim("foo"))));
+	}
+
+	@Test
+	void testDispatched() {
+		var testObjectCodec = RecordJoiners.join(
+				codecs.STRING.fieldOf("foo").withGetter(TestObject::foo),
+				codecs.INTEGER.fieldOf("bar").withGetter(TestObject::bar),
+				TestObject::new
+		);
+		var otherObjectCodec = RecordJoiners.join(
+				codecs.STRING.fieldOf("test").withGetter(OtherTestObject::test),
+				OtherTestObject::new
+		);
+		codecs.STRING.fieldOf("type")
+		             .<Parent>dispatch(
+				             obj -> switch (obj) {
+					             case OtherTestObject ignored -> "other";
+					             case TestObject ignored -> "normal";
+				             },
+				             key -> switch (key) {
+					             case "other" -> otherObjectCodec;
+					             case "normal" -> testObjectCodec;
+					             default -> throw new AssertionError("Unknown thing");
+				             }
+		             );
 	}
 }
 
