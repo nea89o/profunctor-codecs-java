@@ -1,5 +1,5 @@
 allprojects {
-	group = "moe.nea"
+	group = "moe.nea.pcj"
 	version = "1.0-SNAPSHOT"
 
 	repositories {
