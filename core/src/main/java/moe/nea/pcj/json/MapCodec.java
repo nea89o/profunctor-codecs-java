@@ -11,7 +11,7 @@ public interface MapCodec<T, Format> {
 
 	Result<RecordBuilder<Format>, JsonLikeError> encode(T value, JsonLikeOperations<Format> ops);
 
-	default <O> MapCodec<? extends O, Format> dispatch(
+	default <O> MapCodec<O, Format> dispatch(
 			Function<? super O, ? extends T> keyExtractor,
 			Function<? super T, Result<? extends MapCodec<? extends O, Format>, ? extends JsonLikeError>> codecGenerator
 	) {
